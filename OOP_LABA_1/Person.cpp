@@ -39,21 +39,20 @@ uint Person::getNumber_jobs()
     return number_jobs;
 }
 
-void Person::AddJob(void* allworks)
+void Person:: AddJob(Company& comp)
 {
-    Company* comp = (Company*)allworks;
-    if(comp->GetMinSalary() < salary) {
-        cout <<"I want more!! ("<<comp->GetName()<<")"<<endl;
+    if(comp.GetMinSalary() < salary) {
+        cout <<"I want more!! ("<<comp.GetName()<<")"<<endl;
         return;
     }
     if(number_jobs >= 5) {
         cout<<"I have so more work...\n";
         return;
     }
-    comp->AcceptWorker(*this);
+    comp.AcceptWorker(*this);
 }
 
-void Person::add_number_jobs()
+void Person::Add_Number_Jobs()
 {
     number_jobs++;
 }

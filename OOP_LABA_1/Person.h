@@ -6,6 +6,8 @@
 #include <iostream>
 using namespace  std;
 
+class Company;
+
 class Person {
 private:
     string name;
@@ -23,8 +25,8 @@ public:
     uint getAge();
     uint getSalary();
     uint getNumber_jobs();
-    void AddJob(void* allworks);
-    void add_number_jobs();
+    void AddJob(Company& comp);
+    void Add_Number_Jobs();
     bool operator==(const Person a) {
         if(age == a.age && name == a.name && surname == a.surname && patronymic == a.patronymic
                 && number_jobs == a.number_jobs && salary == a.salary) {

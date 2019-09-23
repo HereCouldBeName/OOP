@@ -1,71 +1,79 @@
 #include "Company.h"
+#include "Person.h"
 
-Company::Company(const string& name, const uint salary, const uint age, Person& director)
+bool Company::CheckPeople(Person& people, const string &name, const string &surname, const string &patronymic)
+{
+    if(people.getName() == name && people.getSurname() == surname && people.getPatronymic() == patronymic) {
+        return true;
+    }
+    return false;
+}
+
+Worker Company::CreateWorker(Person &people, uint usefulness, bool isdirector, bool isholiday, uint salary)
+{
+    Worker NewWorker;
+    NewWorker.people = &people;
+    NewWorker.usefulness = usefulness;
+    NewWorker.isdirector = isdirector;
+    NewWorker.isholiday = isholiday;
+    NewWorker.salary = salary;
+    return NewWorker;
+}
+
+Company::Company(const string& name, const uint salary, const uint age, const uint minusefulness, Person& director)
 {
     this->name = name;
-    this->minSalary = salary;
-    this->maxEge = age;
+    this->minsalary = salary;
+    this->maxege = age;
+    this->minusefulness = minusefulness;
     this->AcceptWorker(director);
 }
 
 bool Company::AcceptWorker(Person& people) {
-    for(auto it = worker.begin(); it != worker.end(); it++) {
-        if((*it).IsDirector) {
-            if((*it).IsHoliday == true) {
+    for(auto& it: worker) {
+        if(it.isdirector) {
+            if(it.isholiday) {
                 cout << "Director on holiday (" << name<<")"<<endl;
                 return false;
             }
-            if(people.getAge() > maxEge) {
+            if(people.getAge() > maxege) {
                 cout << "Man is too old (" << name<<")"<<endl;
                 return false;
             }
-            Worker NewWorker;
-            NewWorker.people = &people;
-            NewWorker.usefulness = 0;
-            NewWorker.IsDirector = false;
-            NewWorker.IsHoliday = false;
-            NewWorker.salary = minSalary;
-            worker.push_back(NewWorker);
+            worker.push_back(CreateWorker(people,0,false,false,minsalary));
             return true;
         }
     }
-    Worker NewWorker;
-    NewWorker.people = &people;
-    NewWorker.usefulness = 100;
-    NewWorker.IsDirector = true;
-    NewWorker.IsHoliday = false;
-    NewWorker.salary = minSalary * 5;
-    worker.push_back(NewWorker);
-    people.add_number_jobs();
+    worker.push_back(CreateWorker(people,100,true,false,minsalary*5));
+    people.Add_Number_Jobs();
     return true;
 }
 
-void Company::SetHoliday(Person* person, bool value) {
-    for(auto it = worker.begin(); it != worker.end(); it++) {
-        if((*(*it).people) == *person) {
-            (*it).IsHoliday = value;
+void Company::SetHoliday(Person &person, bool value) {
+    for(auto& it: worker) {
+        if(*(it.people) == person) {
+            it.isholiday = value;
         }
     }
 }
 
 uint Company::GetMinSalary()
 {
-    return minSalary;
+    return minsalary;
 }
 
-void Company::InfoPersonByName(const string& name, const string& surname,const string& patronymic)
+void Company::InfoPersonByName(const string& name, const string& surname, const string& patronymic)
 {
-    for(auto it = worker.begin(); it != worker.end(); it++) {
-        if((*it).people->getName() == name && (*it).people->getSurname() == surname &&
-                                            (*it).people->getPatronymic() == patronymic) {
+    for(auto& it: worker) {
+        if(CheckPeople(*(it.people),name,surname,patronymic)) {
             cout<<"Person "<<name<<" "<<surname<<" "<<patronymic<<" work in company: "<<this->name << endl;
-            if((*it).IsDirector == true) {
+            if(it.isdirector == true) {
                 cout<<"Job title: Director"<<endl;
             } else {
                 cout<<"Job title: Worker"<<endl;
             }
-            cout<<"Usefulness: "<<(*it).usefulness<<endl;
-            cout<<"Salary: "<<(*it).salary<<endl;
+            cout<<"Usefulness: "<<it.usefulness<<endl;
+            cout<<"Salary: "<<it.salary<<endl;
             return;
         }
     }
@@ -74,38 +82,35 @@ void Company::InfoPersonByName(const string& name, const string& surname,const s
 
 Person* Company::GetPersonByName(const string& name, const string& surname, const string& patronymic)
 {
-    for(auto it = worker.begin(); it != worker.end(); it++) {
-        if((*it).people->getName() == name && (*it).people->getSurname() == surname &&
-                                            (*it).people->getPatronymic() == patronymic) {
-            return (it->people);
+    for(auto& it: worker) {
+        if(CheckPeople(*(it.people),name,surname,patronymic)){
+            return it.people;
         }
     }
     return nullptr;
 }
 
-string &Company::GetName()
+const string &Company::GetName()
 {
     return name;
 }
 
 void Company::setUsefulness(Person& people, uint value)
 {
-    for(auto it = worker.begin(); it != worker.end(); it++) {
-        if((*(*it).people) == people) {
-            (*it).usefulness = value;
+    for(auto& it: worker) {
+        if(*(it.people) == people) {
+            it.usefulness = value;
         }
     }
 }
 
 void Company::Dismiss_Worker()
 {
-    uint min = worker[0].usefulness;
-    vector<Worker>::iterator number = worker.begin() ;
-    for(auto it = number + 1; it != worker.end(); it++) {
-        if(min>(*it).usefulness) {
-            min = (*it).usefulness;
-            number = it;
+    for(auto it = worker.begin(); it != worker.end();) {
+        if(minusefulness > (*it).usefulness) {
+            worker.erase(it);
+        } else {
+            it++;
         }
     }
-    worker.erase(number);
 }
